@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-1e0f3ed4","path":"/config/freemode.html","title":"公益模式","lang":"zh-CN","frontmatter":{},"headers":[{"level":2,"title":"启用公益模式","slug":"启用公益模式","link":"#启用公益模式","children":[]}],"git":{"updatedTime":1705407067000,"contributors":[{"name":"GCSLaoLi","email":"cnlidong@live.cn","commits":1}]},"filePathRelative":"config/freemode.md"}');export{e as data};

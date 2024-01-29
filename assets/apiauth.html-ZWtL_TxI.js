@@ -1,0 +1,1 @@
+const t=JSON.parse('{"key":"v-f9f06d2a","path":"/config/apiauth.html","title":"API对接","lang":"zh-CN","frontmatter":{},"headers":[],"git":{"updatedTime":1705452999000,"contributors":[{"name":"GCSLaoLi","email":"cnlidong@live.cn","commits":2}]},"filePathRelative":"config/apiauth.md"}');export{t as data};
