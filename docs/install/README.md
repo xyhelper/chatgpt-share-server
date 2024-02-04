@@ -98,7 +98,7 @@ systemctl reload caddy
 
 ## 管理
 
-后台管理地址: `http://xxx.yourdomain.com/xyhelper`
+后台管理地址: `http://xxx.yourdomain.com/bpjadmin`
 
 默认账号: `admin`
 
