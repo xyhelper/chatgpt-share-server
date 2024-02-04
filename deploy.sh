@@ -15,4 +15,4 @@ git add -A
 git commit -m "deploy | $(date +'%Y-%m-%d %H:%M:%S')"
 
 
-git push -f git@github.com:superhayaren/chatgpt-share-server gh-pages:gh-pages
+git push -f git@github.com:xyhelper/chatgpt-share-server gh-pages:gh-pages
