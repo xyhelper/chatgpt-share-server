@@ -13,7 +13,7 @@ services:
       MYSQL_ROOT_PASSWORD: "123456" # 配置root用户密码
       MYSQL_DATABASE: "cool" # 业务库名
       MYSQL_USER: "cool" # 业务库用户名
-      MTSQL_PASSWORD: "123123" # 业务库密码
+      MTSQL_PASSWORD: "wsy888.." # 业务库密码
     ports:
       - 3306:3306
       
