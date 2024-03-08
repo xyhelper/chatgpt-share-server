@@ -17,7 +17,10 @@ func Login(r *ghttp.Request) {
 	method := r.Method
 	if method == "GET" {
 		req := r.GetMapStrStr()
-
+		if req["carid"] == "" {
+			r.Response.RedirectTo("/list")
+			return
+		}
 		carid := req["carid"]
 		// 	r.Response.WriteTpl("login.html")
 		// 	return
@@ -74,6 +77,17 @@ func Login(r *ghttp.Request) {
 		return
 	} else {
 		req := r.GetMapStrStr()
+		if req["carid"] == "" {
+			r.Response.RedirectTo("/list")
+			return
+		}
+		if req["usertoken"] == "" {
+			r.Response.WriteTpl("login.html", g.Map{
+				"error": "usertoken不能为空",
+				"carid": req["carid"],
+			})
+			return
+		}
 		loginVar := g.Client().PostVar(ctx, config.OauthUrl, req)
 		loginJson := gjson.New(loginVar)
 		// loginJson.Dump()
@@ -97,7 +111,33 @@ func LoginToken(r *ghttp.Request) {
 	ctx := r.GetCtx()
 	req := r.GetMapStrStr()
 	resptype := req["resptype"]
-
+	if req["carid"] == "" {
+		if resptype == "json" {
+			r.Response.WriteJson(g.Map{
+				"code": 0,
+				"msg":  "carid不能为空",
+			})
+			return
+		} else {
+			r.Response.RedirectTo("/list")
+			return
+		}
+	}
+	if req["usertoken"] == "" {
+		if resptype == "json" {
+			r.Response.WriteJson(g.Map{
+				"code": 0,
+				"msg":  "usertoken不能为空",
+			})
+			return
+		} else {
+			r.Response.WriteTpl("login.html", g.Map{
+				"error": "usertoken不能为空",
+				"carid": req["carid"],
+			})
+			return
+		}
+	}
 	loginVar := g.Client().PostVar(ctx, config.OauthUrl, req)
 	loginJson := gjson.New(loginVar)
 	// loginJson.Dump()
