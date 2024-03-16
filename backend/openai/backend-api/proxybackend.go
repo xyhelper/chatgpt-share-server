@@ -4,9 +4,11 @@ import (
 	"backend/config"
 	"backend/modules/chatgpt/model"
 	"backend/utility"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/cool-team-official/cool-admin-go/cool"
@@ -138,12 +140,59 @@ func ProxyBackendWithCar(r *ghttp.Request) {
 	if Authorization != "" {
 		r.Header.Set("Authorization", "Bearer "+carinfo.AccessToken)
 	}
-
+	r.Header.Del("Accept-Encoding")
 	u, _ := url.Parse(config.CHATPROXY)
 	proxy := httputil.NewSingleHostReverseProxy(u)
 	proxy.ErrorHandler = func(writer http.ResponseWriter, request *http.Request, e error) {
 		g.Log().Error(ctx, e)
 		writer.WriteHeader(http.StatusBadGateway)
+	}
+	g.Log().Debug(ctx, "ModifyResponse", r.Request.URL.Path)
+
+	proxy.ModifyResponse = func(resp *http.Response) error {
+		g.Log().Debug(ctx, "ModifyResponse", r.Request.URL.Path)
+		// 如果 路径为 /backend-api/files/file-7FQ4EGrvYXGuQrNpmh8usd1p/download 格式
+		if gstr.Contains(r.Request.URL.Path, "/backend-api/files/") && gstr.Contains(r.Request.URL.Path, "/download") {
+			// 获取返回内容
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				g.Log().Error(ctx, err)
+				return err
+			}
+			// 修改返回内容
+			body = []byte(strings.ReplaceAll(string(body), "https://files.oaiusercontent.com", ""))
+			// 写入返回内容
+			resp.Body = io.NopCloser(strings.NewReader(string(body)))
+
+		}
+		// 如果 路径 为/backend-api/files/file-TraKt2p9Q6y4JL5W1GBjqCaU/uploaded 格式
+		if gstr.Contains(r.Request.URL.Path, "/backend-api/files/") && gstr.Contains(r.Request.URL.Path, "/uploaded") {
+			// 获取返回内容
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				g.Log().Error(ctx, err)
+				return err
+			}
+			// 修改返回内容
+			body = []byte(strings.ReplaceAll(string(body), "https://files.oaiusercontent.com", ""))
+			// 写入返回内容
+			resp.Body = io.NopCloser(strings.NewReader(string(body)))
+		}
+		// 如果路径为 /backend-api/files
+		if gstr.Contains(r.Request.URL.Path, "/backend-api/files") {
+			// 获取返回内容
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				g.Log().Error(ctx, err)
+				return err
+			}
+			// 修改返回内容
+			body = []byte(strings.ReplaceAll(string(body), "https://files.oaiusercontent.com", ""))
+			// 写入返回内容
+			resp.Body = io.NopCloser(strings.NewReader(string(body)))
+		}
+
+		return nil
 	}
 	newreq := r.Request.Clone(ctx)
 	newreq.URL.Host = u.Host

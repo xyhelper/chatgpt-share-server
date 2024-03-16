@@ -4,6 +4,7 @@ import (
 	_ "backend/openai/api"
 	_ "backend/openai/auth"
 	_ "backend/openai/backend-api"
+	_ "backend/openai/fileserver"
 	_ "backend/openai/next"
 	_ "backend/openai/public-api"
 	"backend/openai/workspace"
