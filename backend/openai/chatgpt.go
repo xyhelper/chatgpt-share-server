@@ -4,8 +4,10 @@ import (
 	_ "backend/openai/api"
 	_ "backend/openai/auth"
 	_ "backend/openai/backend-api"
+	_ "backend/openai/fileserver"
 	_ "backend/openai/next"
 	_ "backend/openai/public-api"
+	"backend/openai/workspace"
 
 	"github.com/gogf/gf/v2/frame/g"
 )
@@ -31,5 +33,8 @@ func init() {
 
 	// 列表
 	// group.GET("/list", List)
+
+	// 封禁
+	group.GET("/workspace/deactivated", workspace.Deactivated)
 
 }

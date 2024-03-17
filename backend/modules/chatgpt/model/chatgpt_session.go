@@ -16,6 +16,8 @@ type ChatgptSession struct {
 	CarID           string `gorm:"column:carID;not null;comment:展示ID" json:"carID"`
 	OfficialSession string `gorm:"column:officialSession;comment:官方session" json:"officialSession"`
 	Remark          string `gorm:"column:remark;comment:备注" json:"remark"`
+	// 排序
+	Sort int `gorm:"column:sort;comment:排序;default:0" json:"sort"`
 }
 
 // TableName ChatgptSession's table name

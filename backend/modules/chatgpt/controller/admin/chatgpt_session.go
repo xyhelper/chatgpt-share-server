@@ -2,8 +2,11 @@ package admin
 
 import (
 	"backend/modules/chatgpt/service"
+	"context"
 
 	"github.com/cool-team-official/cool-admin-go/cool"
+	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/frame/g"
 )
 
 type ChatgptSessionController struct {
@@ -22,19 +25,19 @@ func init() {
 	cool.RegisterController(chatgpt_session_controller)
 }
 
-// // 增加 Welcome 演示 方法
-// type ChatgptSessionWelcomeReq struct {
-// 	g.Meta `path:"/welcome" method:"GET"`
-// }
-// type ChatgptSessionWelcomeRes struct {
-// 	*cool.BaseRes
-// 	Data interface{} `json:"data"`
-// }
+// 增加 InfoBYCarID
+type ChatgptSessionInfoBYCarIDReq struct {
+	g.Meta `path:"/infobycarid" method:"GET"` // 这里指定路由和请求方法
+}
+type ChatgptSessionInfoBYCarIDRes struct { // 返回值
+	*cool.BaseRes
+	Data interface{} `json:"data"`
+}
 
-// func (c *ChatgptSessionController) Welcome(ctx context.Context, req *ChatgptSessionWelcomeReq) (res *ChatgptSessionWelcomeRes, err error) {
-// 	res = &ChatgptSessionWelcomeRes{
-// 		BaseRes: cool.Ok("Welcome to Cool Admin Go"),
-// 		Data:    gjson.New(`{"name": "Cool Admin Go", "age":0}`),
-// 	}
-// 	return
-// }
+func (c *ChatgptSessionController) Welcome(ctx context.Context, req *ChatgptSessionInfoBYCarIDReq) (res *ChatgptSessionInfoBYCarIDRes, err error) {
+	res = &ChatgptSessionInfoBYCarIDRes{
+		BaseRes: cool.Ok("Welcome to Cool Admin Go"),
+		Data:    gjson.New(`{"name": "Cool Admin Go", "age":0}`),
+	}
+	return
+}

@@ -14,6 +14,10 @@ func NewChatgptConversationsService() *ChatgptConversationsService {
 	return &ChatgptConversationsService{
 		&cool.Service{
 			Model: model.NewChatgptConversations(),
+			PageQueryOp: &cool.QueryOp{
+				FieldEQ:      []string{"convid", "title", "chatgptaccountid", "email", "usertoken"},
+				KeyWordField: []string{"convid", "title", "chatgptaccountid", "email", "usertoken"},
+			},
 		},
 	}
 }

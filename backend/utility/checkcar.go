@@ -14,6 +14,7 @@ type CarInfo struct {
 	IsPlusStr     string
 	RefreshCookie string
 	AccessToken   string
+	Password      string
 }
 
 func CheckCar(ctx g.Ctx, carid string) (carInfo *CarInfo, err error) {
@@ -32,6 +33,13 @@ func CheckCar(ctx g.Ctx, carid string) (carInfo *CarInfo, err error) {
 		return
 	}
 	carInfo.Email = email
+	// password := sessionJson.Get("user.password").String()
+	// if password == "" {
+	// 	err = gerror.New("password is empty")
+	// 	return
+	// }
+	// carInfo.Password = password
+
 	refreshCookie := sessionJson.Get("refreshCookie").String()
 	if refreshCookie == "" {
 		err = gerror.New("refreshCookie is empty")
@@ -55,5 +63,11 @@ func CheckCar(ctx g.Ctx, carid string) (carInfo *CarInfo, err error) {
 	} else {
 		carInfo.IsPlusStr = "3.5"
 	}
+	return
+}
+
+// CloseCar is a function that closes a car.
+func CloseCar(ctx g.Ctx, carid string) (err error) {
+	_, err = cool.CacheManager.Remove(ctx, "session:"+carid)
 	return
 }

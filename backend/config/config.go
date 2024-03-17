@@ -16,9 +16,9 @@ var (
 	PORT         = 8001
 	CHATPROXY    = "https://demo.xyhelper.cn"
 	AUTHKEY      = "xyhelper"
-	ArkoseUrl    = "https://tcr9i.closeai.biz/v2/"
-	BuildId      = "PFzTxQNocNiG6gdS1bBR-"
-	CacheBuildId = "PFzTxQNocNiG6gdS1bBR-"
+	ArkoseUrl    = "/v2/"
+	BuildId      = "CdVKBysnaJNkqh_-wcfYZ"
+	CacheBuildId = "CdVKBysnaJNkqh_-wcfYZ"
 	AssetPrefix  = "https://oaistatic-cdn.closeai.biz"
 	PK40         = "35536E1E-65B4-4D96-9D97-6ADB7EFF8147"
 	PK35         = "3D86FBBA-9D22-402A-B512-3420086BA6CC"
@@ -36,6 +36,9 @@ var (
 	OauthUrl      = ""
 	AuditLimitUrl = ""
 	APIAUTH       = ""
+	DISALLOW_ROAM = false // 是否禁止漫游
+	FILESERVER    = ""
+
 	// Generator *badge.Generator
 )
 
@@ -78,6 +81,10 @@ func init() {
 	s := g.Server()
 	s.SetPort(PORT)
 	s.SetServerRoot("resource/public")
+	disallowRoam := g.Cfg().MustGetWithEnv(ctx, "DISALLOW_ROAM").Bool()
+	if disallowRoam {
+		DISALLOW_ROAM = disallowRoam
+	}
 
 	oauthUrl := g.Cfg().MustGetWithEnv(ctx, "OAUTH_URL").String()
 	if oauthUrl != "" {
@@ -96,8 +103,13 @@ func init() {
 		APIAUTH = apiAuth
 	}
 	g.Log().Info(ctx, "APIAUTH:", APIAUTH)
+	fileserver := g.Cfg().MustGetWithEnv(ctx, "FILESERVER").String()
+	if fileserver != "" {
+		FILESERVER = fileserver
+	}
+	g.Log().Info(ctx, "FILESERVER:", FILESERVER)
 
-	// 每小时更新一次
+	// 每10分钟检查一次版本
 	go func() {
 		for {
 			build := CheckNewVersion(ctx)
@@ -111,7 +123,7 @@ func init() {
 			}
 			g.Log().Info(ctx, "CacheBuildId:", CacheBuildId)
 			g.Log().Info(ctx, "CheckNewVersion:", BuildId, CacheBuildId)
-			time.Sleep(time.Hour)
+			time.Sleep(10 * time.Minute)
 		}
 
 	}()

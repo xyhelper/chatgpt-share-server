@@ -55,6 +55,7 @@ const Table = useTable({
 		{ label: "会话id", prop: "convid" },
 		{ label: "会话标题", prop: "title" },
 		{ label: "官网账号邮箱", prop: "email" },
+		{ label: "组织ID", prop: "chatgptaccountid" },
 		{ type: "op", buttons: ["edit", "delete"] }
 	]
 });

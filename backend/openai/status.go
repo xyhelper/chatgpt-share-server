@@ -26,13 +26,16 @@ func Status(r *ghttp.Request) {
 		return
 	}
 	expTime := cool.CacheManager.MustGetExpire(ctx, "clears_in:"+carid)
+	teamExpTime := cool.CacheManager.MustGetExpire(ctx, "team_clears_in:"+carid)
 	expInt := gconv.Int(expTime.Seconds())
+	teamExpInt := gconv.Int(teamExpTime.Seconds())
 	count := utility.GetStatsInstance(carid).GetCallCount()
 	r.Response.WriteJson(g.Map{
-		"isPlus":       carInfo.IsPlus,
-		"accountReady": true,
-		"clears_in":    expInt,
-		"count":        count,
+		"isPlus":         carInfo.IsPlus,
+		"accountReady":   true,
+		"clears_in":      expInt,
+		"team_clears_in": teamExpInt,
+		"count":          count,
 	})
 
 }
@@ -44,6 +47,7 @@ func EndPoint(r *ghttp.Request) {
 	lable := ""
 	message := ""
 	clears_in := 0
+	team_clears_in := 0
 
 	carid := r.Get("carid").String()
 	if carid == "" {
@@ -69,10 +73,16 @@ func EndPoint(r *ghttp.Request) {
 		return
 	}
 	expTime := cool.CacheManager.MustGetExpire(ctx, "clears_in:"+carid)
+	teamExpTime := cool.CacheManager.MustGetExpire(ctx, "team_clears_in:"+carid)
 	expInt := gconv.Int(expTime.Seconds())
+	teamExpInt := gconv.Int(teamExpTime.Seconds())
 	if expInt > 0 {
 		clears_in = expInt
 	}
+	if teamExpInt > 0 {
+		team_clears_in = teamExpInt
+	}
+
 	count := utility.GetStatsInstance(carid).GetCallCount()
 
 	if carInfo.IsPlus {
@@ -82,9 +92,23 @@ func EndPoint(r *ghttp.Request) {
 		lable = "3.5"
 		labelColor = "blue"
 	}
-	if clears_in > 0 {
-		color = "red"
-		message = "停运｜将于" + gconv.String(clears_in) + "秒后恢复"
+	if clears_in > 0 || team_clears_in > 0 {
+		if clears_in > 0 && team_clears_in > 0 {
+			// PLUS及team同时停运
+			color = "red"
+			// 获取最小的时间
+			message = "停运｜将于" + gconv.String(min(clears_in, team_clears_in)) + "秒后恢复"
+		}
+		if clears_in > 0 && team_clears_in == 0 {
+			// PLUS停运
+			color = "red"
+			message = "PLUS停运｜将于" + gconv.String(clears_in) + "秒后恢复"
+		}
+		if clears_in == 0 && team_clears_in > 0 {
+			// team停运
+			color = "red"
+			message = "TEAM停运｜将于" + gconv.String(team_clears_in) + "秒后恢复"
+		}
 	} else {
 		if count < 20 {
 			color = "green"
@@ -102,4 +126,12 @@ func EndPoint(r *ghttp.Request) {
 		"labelColor":    labelColor,
 		"namedLogo":     "Cockroach Labs",
 	})
+}
+
+// 从两个整数中获取最小值
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

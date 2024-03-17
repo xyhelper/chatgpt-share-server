@@ -28,7 +28,7 @@
 		<f-k-arkos
 			:public-key="publicKey"
 			mode="lightbox"
-			arkosUrl="https://tcr9i.closeai.biz"
+			arkosUrl="https://tcr9i-login.closeai.biz"
 			@onCompleted="onCompleted($event)"
 			@onError="onError($event)"
 		/>
@@ -38,13 +38,13 @@
 <script lang="ts" name="chatgpt-session" setup>
 import { useCrud, useTable, useUpsert } from "@cool-vue/crud";
 import { useCool } from "/@/cool";
-import { v4 as uuidv4 } from "uuid";
 
 const { service } = useCool();
 
 // cl-upsert 配置
 const Upsert = useUpsert({
 	items: [
+		{ label: "排序", prop: "sort", component: { name: "el-input-number" } },
 		{ label: "车号", prop: "carID", required: true, component: { name: "el-input" } },
 
 		{ label: "邮箱", prop: "email", required: true, component: { name: "el-input" } },
@@ -87,6 +87,10 @@ const Upsert = useUpsert({
 		if (!data.carID) {
 			data.carID = Math.random().toString(36).substring(2, 10);
 		}
+		// 给sort赋值0
+		if (!data.sort) {
+			data.sort = 0;
+		}
 		localStorage.removeItem("arkoseToken");
 		window.myEnforcement.run();
 	},
@@ -109,16 +113,16 @@ const Table = useTable({
 	columns: [
 		{ type: "selection" },
 		{ label: "id", prop: "id" },
-		{ label: "创建时间", prop: "createTime" },
-		{ label: "更新时间", prop: "updateTime" },
-		{ label: "车号", prop: "carID" },
-
-		{ label: "邮箱", prop: "email" },
-		{ label: "密码", prop: "password" },
-		{ label: "状态", prop: "status", component: { name: "cl-switch" } },
+		{ label: "创建时间", prop: "createTime", sortable: true },
+		{ label: "更新时间", prop: "updateTime", sortable: true },
+		{ label: "排序", prop: "sort", sortable: true },
+		{ label: "车号", prop: "carID", sortable: true },
+		{ label: "邮箱", prop: "email", sortable: true },
+		{ label: "密码", prop: "password", sortable: true },
+		{ label: "状态", prop: "status", sortable: true, component: { name: "cl-switch" } },
 		{ label: "PLUS", prop: "isPlus", component: { name: "cl-switch" } },
-		{ label: "session", prop: "officialSession", showOverflowTooltip: true },
-		{ label: "备注", prop: "remark", showOverflowTooltip: true },
+		{ label: "session", prop: "officialSession", sortable: true, showOverflowTooltip: true },
+		{ label: "备注", prop: "remark", sortable: true, showOverflowTooltip: true },
 		{ type: "op", buttons: ["edit", "delete"] }
 	]
 });
@@ -135,6 +139,8 @@ const Crud = useCrud(
 </script>
 <script lang="ts">
 import FKArkos from "./FKArkos.vue";
+import { ElMessage, ElMessageBox } from "element-plus";
+
 import { defineComponent } from "vue";
 export default defineComponent({
 	components: {
@@ -150,13 +156,28 @@ export default defineComponent({
 	methods: {
 		onCompleted(token: string) {
 			console.log("onCompleted---------->", token);
+			ElMessage({
+				message: "人机验证已完成.",
+				type: "success"
+			});
 			localStorage.setItem("arkoseToken", token);
 
 			this.arkoseToken = token;
 			// router.replace({ path: "/dashboard" });
 		},
 		onError(errorMessage: any) {
-			alert(errorMessage);
+			// alert(errorMessage);
+			ElMessageBox.alert("加载人机验证失败,请刷新页面重试!", errorMessage.error.error, {
+				// if you want to disable its autofocus
+				// autofocus: false,
+				confirmButtonText: "OK"
+				// callback: (action: Action) => {
+				// 	ElMessage({
+				// 		type: "info",
+				// 		message: `action: ${action}`
+				// 	});
+				// }
+			});
 		},
 
 		onSubmit() {

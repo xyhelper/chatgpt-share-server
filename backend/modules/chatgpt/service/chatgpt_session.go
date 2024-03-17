@@ -3,12 +3,12 @@ package service
 import (
 	"backend/config"
 	"backend/modules/chatgpt/model"
-	"time"
 
 	"github.com/cool-team-official/cool-admin-go/cool"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/util/gconv"
 )
 
@@ -49,6 +49,8 @@ func (s *ChatgptSessionService) ModifyBefore(ctx g.Ctx, method string, param map
 			}
 			carid := record["carID"].String()
 			cool.CacheManager.Remove(ctx, "session:"+carid)
+			email := record["email"].String()
+			cool.CacheManager.Remove(ctx, "email:"+email)
 		}
 	}
 	return
@@ -56,7 +58,9 @@ func (s *ChatgptSessionService) ModifyBefore(ctx g.Ctx, method string, param map
 
 // ModifyAfter 新增/删除/修改之后的操作
 func (s *ChatgptSessionService) ModifyAfter(ctx g.Ctx, method string, param map[string]interface{}) (err error) {
+
 	g.Log().Debug(ctx, "ChatgptSessionService.ModifyAfter", method, param)
+	// g.Dump(param)
 	// 新增/修改 之后，更新session
 	if method != "Add" && method != "Update" {
 		return
@@ -64,7 +68,6 @@ func (s *ChatgptSessionService) ModifyAfter(ctx g.Ctx, method string, param map[
 	officialSession := gjson.New(param["officialSession"])
 	refreshCookie := officialSession.Get("refreshCookie").String()
 	// 如果没有officialSession，就去获取
-	g.Log().Debug(ctx, "ChatgptSessionService.ModifyAfter", "officialSession is empty")
 	getSessionUrl := config.CHATPROXY + "/getsession"
 	sessionVar := g.Client().SetHeader("authkey", config.AUTHKEY).SetCookie("arkoseToken", gconv.String(param["arkoseToken"])).PostVar(ctx, getSessionUrl, g.Map{
 		"username":      param["email"],
@@ -78,7 +81,7 @@ func (s *ChatgptSessionService) ModifyAfter(ctx g.Ctx, method string, param map[
 		detail := sessionJson.Get("detail").String()
 		if detail != "" {
 			err = gerror.New(detail)
-			cool.DBM(s.Model).Where("email=?", param["email"]).Update(g.Map{
+			cool.DBM(s.Model).Where("carid=?", param["carID"]).Update(g.Map{
 				"officialSession": sessionJson.String(),
 				"status":          0,
 			})
@@ -87,8 +90,10 @@ func (s *ChatgptSessionService) ModifyAfter(ctx g.Ctx, method string, param map[
 		}
 		return
 	}
+	email := sessionJson.Get("user.email").String()
 	models := sessionJson.Get("models").Array()
-	_, err = cool.DBM(s.Model).Where("email=?", param["email"]).Update(g.Map{
+	_, err = cool.DBM(s.Model).Where("carid=?", param["carID"]).Update(g.Map{
+		"email":           email,
 		"officialSession": sessionJson.String(),
 		"isPlus":          len(models) > 1,
 		"status":          1,
@@ -97,6 +102,25 @@ func (s *ChatgptSessionService) ModifyAfter(ctx g.Ctx, method string, param map[
 		g.Log().Error(ctx, "ChatgptSessionService.ModifyAfter", "update session error", err)
 		return
 	}
-	cool.CacheManager.Set(ctx, "session:"+gconv.String(param["carID"]), sessionJson.String(), 90*24*time.Hour)
+	cool.CacheManager.Set(ctx, "session:"+gconv.String(param["carID"]), sessionJson.String(), 0)
+	cool.CacheManager.Set(ctx, "email:"+email, gconv.String(param["carID"]), 0)
 	return
+}
+
+func init() {
+	ctx := gctx.GetInitCtx()
+	sessionRecords, err := cool.DBM(NewChatgptSessionService().Model).All()
+	if err != nil {
+		panic(err)
+	}
+	for _, record := range sessionRecords {
+		sessionJson := gjson.New(record["officialSession"])
+		// sessionJson.Dump()
+		email := sessionJson.Get("user.email").String()
+		g.Log().Debug(ctx, "init session", record["carID"], email)
+		if email != "" {
+			cool.CacheManager.Set(ctx, "session:"+record["carID"].String(), record["officialSession"].String(), 0)
+			cool.CacheManager.Set(ctx, "email:"+email, record["carID"].String(), 0)
+		}
+	}
 }

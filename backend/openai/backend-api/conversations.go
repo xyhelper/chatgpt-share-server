@@ -1,6 +1,7 @@
 package backendapi
 
 import (
+	"backend/config"
 	"backend/modules/chatgpt/model"
 	"backend/utility"
 
@@ -27,9 +28,9 @@ func Conversations(r *ghttp.Request) {
 		})
 		return
 	}
+	method := r.Method
 	carid := r.Session.MustGet("carid").String()
 	carinfo, err := utility.CheckCar(ctx, carid)
-	method := r.Method
 
 	if err != nil {
 		g.Log().Error(ctx, err)
@@ -43,11 +44,22 @@ func Conversations(r *ghttp.Request) {
 	if method == "GET" {
 		offset := r.Get("offset").Int()
 		limit := r.Get("limit").Int()
-		items, total, err := cool.DBM(model.NewChatgptConversations()).Where(g.Map{
-			"usertoken":        usertoken,
-			"email":            carinfo.Email,
-			"chatgptaccountid": r.Header.Get("ChatGPT-Account-ID"),
-		}).OrderDesc("updateTime").Limit(limit).Offset(offset).AllAndCount(true)
+		// total := 100
+		modelquery := cool.DBM(model.NewChatgptConversations()).As("a").LeftJoin("chatgpt_session", "b", "a.email=b.email").Fields("a.createTime", "a.updateTime", "a.convid", "a.title")
+		if config.DISALLOW_ROAM {
+			modelquery.Where(g.Map{
+				"a.usertoken":        usertoken,
+				"a.email":            carinfo.Email,
+				"a.chatgptaccountid": r.Header.Get("ChatGPT-Account-ID"),
+			})
+
+		} else {
+			modelquery.Where(g.Map{
+				"a.usertoken": usertoken,
+				"b.status":    "1",
+			})
+		}
+		items, total, err := modelquery.OrderDesc("a.updateTime").Limit(limit).Offset(offset).AllAndCount(false)
 		if err != nil {
 			g.Log().Error(ctx, err)
 			r.Response.Status = 500
@@ -90,9 +102,9 @@ func Conversations(r *ghttp.Request) {
 	// 清除所有会话
 	if method == "PATCH" {
 		cool.DBM(model.NewChatgptConversations()).Where(g.Map{
-			"usertoken":        usertoken,
-			"email":            carinfo.Email,
-			"chatgptaccountid": r.Header.Get("ChatGPT-Account-ID"),
+			"usertoken": usertoken,
+			// "email":            carinfo.Email,
+			// "chatgptaccountid": r.Header.Get("ChatGPT-Account-ID"),
 		}).Delete()
 		r.Response.WriteJson(g.Map{
 			"success": true,

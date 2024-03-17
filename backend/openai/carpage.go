@@ -28,7 +28,8 @@ func CarPage(r *ghttp.Request) {
 	if size == 0 {
 		size = 10
 	}
-	record, count, err := cool.DBM(model.NewChatgptSession()).Fields("carID", "status", "isPlus").Limit(size).Offset((page - 1) * size).AllAndCount(false)
+	// .Limit(size).Offset((page - 1) * size).AllAndCount(false)
+	record, count, err := cool.DBM(model.NewChatgptSession()).Fields("carID", "status", "isPlus").OrderDesc("sort").OrderAsc("id").Page(page, size).AllAndCount(false)
 	if err != nil {
 		r.Response.WriteJson(g.Map{
 			"detail": err.Error(),

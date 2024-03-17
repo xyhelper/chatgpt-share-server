@@ -27,6 +27,7 @@ export default defineUserConfig({
         "/config/freemode.md",
         "/config/oauth.md",
         "/config/resetpasswd.md",
+        "/config/roma.md",
       ],
     },
   }),

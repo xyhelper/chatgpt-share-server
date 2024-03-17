@@ -793,6 +793,10 @@ declare namespace Eps {
 		 */
 		info(data?: any): Promise<any>;
 		/**
+		 * infobycarid
+		 */
+		infobycarid(data?: any): Promise<any>;
+		/**
 		 * list
 		 */
 		list(data?: any): Promise<any[]>;
@@ -815,6 +819,7 @@ declare namespace Eps {
 			add: string;
 			delete: string;
 			info: string;
+			infobycarid: string;
 			list: string;
 			page: string;
 			update: string;
@@ -826,6 +831,7 @@ declare namespace Eps {
 			add: boolean;
 			delete: boolean;
 			info: boolean;
+			infobycarid: boolean;
 			list: boolean;
 			page: boolean;
 			update: boolean;

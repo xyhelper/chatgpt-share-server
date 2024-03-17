@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>清理本地存储</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      function clearLocalStorageAndRedirect() {
+        localStorage.clear();
+        // 延时60秒后跳转
+        setTimeout(function () {
+          // 这里是你想要延时60秒后执行的代码
+          console.log("10秒后执行的代码");
+          window.location.href = "/list"; // 请将此处替换为你的首页地址
+        }, 10000); // 60000毫秒等于60秒
+      }
+    </script>
+  </head>
+  <body onload="clearLocalStorageAndRedirect()">
+    <p>{{.carid}}车辆状态异常,请更换其他车辆...</p>
+    <p>如果浏览器没有自动跳转，请点击<a href="/list">这里</a></p>
+  </body>
+</html>
