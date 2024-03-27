@@ -15,7 +15,7 @@ function resolve(dir: string) {
 
 export default (): UserConfig => {
 	return {
-		base: "/xyhelper/",
+		base: "/bpjadmin/",
 		plugins: [
 			vue(),
 			compression(),
