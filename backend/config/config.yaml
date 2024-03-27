@@ -62,8 +62,8 @@ modules:
 
 
 # 接入网关地址
-CHATPROXY: "https://demo.xyhelper.cn"
-# CHATPROXY: "https://chatproxy-dev.closeai.biz"
+# CHATPROXY: "https://demo.xyhelper.cn"
+CHATPROXY: "https://chatproxy-dev.closeai.biz"
 # 接入网关的authkey
 AUTHKEY: "xyhelper"
 # 免费模式下的oauth地址
