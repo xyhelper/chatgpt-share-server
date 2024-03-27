@@ -36,7 +36,9 @@ var (
 	OauthUrl      = ""
 	AuditLimitUrl = ""
 	APIAUTH       = ""
-	DISALLOW_ROAM = false
+	DISALLOW_ROAM = false // 是否禁止漫游
+	FILESERVER    = ""
+
 	// Generator *badge.Generator
 )
 
@@ -101,6 +103,11 @@ func init() {
 		APIAUTH = apiAuth
 	}
 	g.Log().Info(ctx, "APIAUTH:", APIAUTH)
+	fileserver := g.Cfg().MustGetWithEnv(ctx, "FILESERVER").String()
+	if fileserver != "" {
+		FILESERVER = fileserver
+	}
+	g.Log().Info(ctx, "FILESERVER:", FILESERVER)
 
 	// 每10分钟检查一次版本
 	go func() {

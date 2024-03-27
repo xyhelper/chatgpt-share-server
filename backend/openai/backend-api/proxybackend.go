@@ -86,25 +86,20 @@ func ProxyBackendWithCar(r *ghttp.Request) {
 			})
 			return
 		}
-		if result == nil {
-			r.Response.Status = 404
-			r.Response.WriteJson(g.Map{
-				"detail": "Can't load conversation " + conv,
-			})
-			return
+		if result != nil {
+			email := result["email"].String()
+			caridVar, err := g.Redis("cool").Get(ctx, "email:"+email)
+			if err != nil {
+				g.Log().Error(ctx, err)
+				r.Response.Status = 500
+				r.Response.WriteJson(g.Map{
+					"detail": "Internal Server Error",
+				})
+				return
+			}
+			carid = caridVar.String()
+			g.Log().Info(ctx, conv, "email:", email, "carid:", caridVar.String())
 		}
-		email := result["email"].String()
-		caridVar, err := g.Redis("cool").Get(ctx, "email:"+email)
-		if err != nil {
-			g.Log().Error(ctx, err)
-			r.Response.Status = 500
-			r.Response.WriteJson(g.Map{
-				"detail": "Internal Server Error",
-			})
-			return
-		}
-		carid = caridVar.String()
-		g.Log().Info(ctx, conv, "email:", email, "carid:", caridVar.String())
 
 		if carid == "" {
 			r.Response.Status = 404
@@ -160,7 +155,7 @@ func ProxyBackendWithCar(r *ghttp.Request) {
 				return err
 			}
 			// 修改返回内容
-			body = []byte(strings.ReplaceAll(string(body), "https://files.oaiusercontent.com", ""))
+			body = []byte(strings.ReplaceAll(string(body), "https://files.oaiusercontent.com", config.FILESERVER))
 			// 写入返回内容
 			resp.Body = io.NopCloser(strings.NewReader(string(body)))
 
@@ -174,7 +169,7 @@ func ProxyBackendWithCar(r *ghttp.Request) {
 				return err
 			}
 			// 修改返回内容
-			body = []byte(strings.ReplaceAll(string(body), "https://files.oaiusercontent.com", ""))
+			body = []byte(strings.ReplaceAll(string(body), "https://files.oaiusercontent.com", config.FILESERVER))
 			// 写入返回内容
 			resp.Body = io.NopCloser(strings.NewReader(string(body)))
 		}
@@ -187,7 +182,7 @@ func ProxyBackendWithCar(r *ghttp.Request) {
 				return err
 			}
 			// 修改返回内容
-			body = []byte(strings.ReplaceAll(string(body), "https://files.oaiusercontent.com", ""))
+			body = []byte(strings.ReplaceAll(string(body), "https://files.oaiusercontent.com", config.FILESERVER))
 			// 写入返回内容
 			resp.Body = io.NopCloser(strings.NewReader(string(body)))
 		}

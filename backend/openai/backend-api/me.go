@@ -33,8 +33,13 @@ func Me(r *ghttp.Request) {
 		return
 	}
 	res, err := g.Client().SetHeaderMap(g.MapStrStr{
-		"Authorization": "Bearer " + carinfo.AccessToken,
-		"User-Agent":    r.Header.Get("User-Agent"),
+		"Accept":          "*.*",
+		"Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+		"Authorization":   "Bearer " + carinfo.AccessToken,
+		"Sec-Fetch-Dest":  "empty",
+		"Sec-Fetch-Mode":  "cors",
+		"Sec-Fetch-Site":  "same-origin",
+		"User-Agent":      r.Header.Get("User-Agent"),
 	}).Get(ctx, config.CHATPROXY+"/backend-api/me")
 	if err != nil {
 		g.Log().Error(ctx, err)
